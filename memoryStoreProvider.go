@@ -14,7 +14,7 @@ func NewMemoryStoreProvider() MemoryStoreProvider {
 	return MemoryStoreProvider{state: &MemoryStoreState{tenants: map[string]*MemoryStoreTenantState{}}}
 }
 
-func (p MemoryStoreProvider) CreateTenant(tenant string) error {
+func (p MemoryStoreProvider) NewTenant(tenant string) error {
 	state := p.state
 	if _, exists := state.tenants[tenant]; exists {
 		return errors.New(fmt.Sprintln("Tenant already exists", tenant))
@@ -24,6 +24,7 @@ func (p MemoryStoreProvider) CreateTenant(tenant string) error {
 		eventsMap: map[StreamId][]PersistedEvent{},
 		events:    []PersistedEvent{},
 		sequence:  atomic.Uint64{},
+		snapshots: map[StreamId]Snapshot{},
 	}
 	return nil
 }

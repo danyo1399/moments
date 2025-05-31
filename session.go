@@ -2,10 +2,12 @@ package moments
 
 import (
 	"errors"
+	"fmt"
 )
 
 type SessionProvider struct {
 	StoreProvider StoreProvider
+	Config        Config
 }
 type Session struct {
 	Store         Store
@@ -13,11 +15,17 @@ type Session struct {
 	CausationId   CausationId
 	Metadata      Metadata
 	tenant        string
+	config        Config
+	persister     IStoreStrategy
 }
 
-func NewSessionProvider(storeProvider StoreProvider) SessionProvider {
+func NewSessionProvider(storeProvider StoreProvider, config Config) SessionProvider {
+	if config.Serialiser == nil {
+		config.Serialiser = &JsonSerialiser
+	}
 	return SessionProvider{
 		StoreProvider: storeProvider,
+		Config:        config,
 	}
 }
 
@@ -27,56 +35,50 @@ func (sp *SessionProvider) NewSession(tenant string) (*Session, error) {
 		return nil, err
 	}
 
-	session := NewSession(tenant, store)
+	session := newSession(tenant, store, sp.Config)
 	return &session, nil
 }
 
-func NewSession(tenant string, store Store) Session {
+func newSession(tenant string, store Store, config Config) Session {
 	return Session{
 		Store:         store,
 		tenant:        tenant,
 		CorrelationId: "",
 		CausationId:   "",
 		Metadata:      map[string]any{},
+		config:        config,
 	}
 }
 
-type LoadAggregateArgs interface {
-	StreamId() StreamId
-	Version() Version
-	Load(events []any)
+func (s *Session) LoadAggregate(aggregate IAggregate) error {
+	aggregateConfig, ok := s.config.Aggregates[aggregate.AggregateType()]
+	if !ok {
+		return errors.New(fmt.Sprintln("Unknown aggregate type", aggregate.AggregateType()))
+	}
+	aggregateStrategy := aggregateConfig.StoreStrategy
+
+	storeStrategy, ok := StoreStrategies[aggregateStrategy]
+	if !ok {
+		return errors.New(fmt.Sprintln("Unknown store strategy", aggregateStrategy))
+	}
+	return storeStrategy.Load(aggregate, s)
 }
 
-func (s *Session) LoadAggregate(aggregate LoadAggregateArgs) error {
-	streamId := aggregate.StreamId()
-	fromVersion := aggregate.Version() + Version(1)
-	events, err := s.Store.LoadEvents(LoadEventsOptions{
-		StreamId:    streamId,
-		FromVersion: fromVersion,
-	})
-	if err != nil {
-		return err
+func (s *Session) Save(aggregate IAggregate) error {
+	aggregateConfig, ok := s.config.Aggregates[aggregate.AggregateType()]
+	if !ok {
+		return errors.New(fmt.Sprintln("Unknown aggregate type", aggregate.AggregateType()))
 	}
-	aggregate.Load(AnySlice(events))
-	return nil
+	aggregateStrategy := aggregateConfig.StoreStrategy
+
+	storeStrategy, ok := StoreStrategies[aggregateStrategy]
+	if !ok {
+		return errors.New(fmt.Sprintln("Unknown store strategy", aggregateStrategy))
+	}
+	return storeStrategy.Save(aggregate, s)
 }
 
-func (s *Session) Save(agg AggregateEvents) error {
-	events := agg.UnsavedEvents()
-
-	version := agg.Version()
-	err := s.SaveEvents(agg.StreamId(), events, &version)
-	if err != nil {
-		return err
-	}
-	agg.ClearUnsavedEvents()
-	return nil
-}
-
-func (s *Session) SaveEvents(streamId StreamId, events []Event, expectedVersion *Version) error {
-	if expectedVersion != nil && *expectedVersion == 0 {
-		return errors.New("cannot save stream with no events")
-	}
+func (s *Session) newSaveEventArgs(streamId StreamId, events []Event, expectedVersion Version) SaveEventArgs {
 	args := SaveEventArgs{
 		StreamId:        streamId,
 		Events:          events,
@@ -85,7 +87,28 @@ func (s *Session) SaveEvents(streamId StreamId, events []Event, expectedVersion 
 		CausationId:     s.CausationId,
 		Metadata:        s.Metadata,
 	}
-	return s.Store.SaveEvents(args)
+	return args
+}
+
+func (s *Session) saveEvents(streamId StreamId, events []Event, expectedVersion Version) error {
+	if expectedVersion == 0 {
+		return errors.New("cannot save stream with no events")
+	}
+
+	a := s.newSaveEventArgs(streamId, events, expectedVersion)
+	return s.Store.SaveEvents(a)
+}
+
+func (s *Session) saveEventsWithSnapshot(
+	streamId StreamId, events []Event, expectedVersion Version, snapshot *Snapshot,
+) error {
+	if expectedVersion == 0 {
+		return errors.New("cannot save stream with no events")
+	}
+
+	a := s.newSaveEventArgs(streamId, events, expectedVersion)
+	a.Snapshot = snapshot
+	return s.Store.SaveEvents(a)
 }
 
 func (s *Session) LoadStream(streamId StreamId) ([]PersistedEvent, error) {

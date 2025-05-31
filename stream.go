@@ -4,7 +4,7 @@ import "fmt"
 
 type StreamId struct {
 	Id string
-	StreamType string
+	StreamType AggregateType
 }
 
 type Stream struct {

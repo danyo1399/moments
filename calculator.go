@@ -22,10 +22,11 @@ type Calculator struct {
 	Aggregate[CalculatorState]
 }
 
+const CalculatorType AggregateType = "Calculator"
 var initStateFunc = func() CalculatorState {
 	return CalculatorState{0}
 }
-var newCalculatorAggregate = NewAggregateFactory("Calculator", initStateFunc, reducer)
+var newCalculatorAggregate = NewAggregateFactory(CalculatorType, initStateFunc, reducer)
 
 func reducer(state CalculatorState, events ...any) CalculatorState {
 	for _, event := range events {

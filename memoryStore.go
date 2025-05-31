@@ -9,22 +9,31 @@ type MemoryStore struct {
 	state *MemoryStoreTenantState
 }
 
-var globalSequence = 0
-
-func NewMemoryStore(state *MemoryStoreTenantState) MemoryStore {
+func NewMemoryStore(state *MemoryStoreTenantState) *MemoryStore {
 	s := MemoryStore{state: state}
-	return s
+	return &s
 }
 
-func (s MemoryStore) Close() {
+func (s *MemoryStore) Close() {
 }
 
-func (s MemoryStore) SaveSnapshot(snapshot Snapshot[any]) error {
-	panic("implement me")
+func (s *MemoryStore) SaveSnapshot(snapshot *Snapshot) error {
+	streamId := snapshot.StreamId 
+	s.state.snapshots[streamId] = *snapshot
+	return nil
 }
 
-func (s MemoryStore) LoadSnpashot(streamId StreamId) (Snapshot[any], error) {
-	panic("implement me")
+func (s *MemoryStore) LoadSnapshot(streamId StreamId) (*Snapshot, error) {
+	ss, ok := s.state.snapshots[streamId]
+	if !ok {
+		return nil, nil 
+	}
+	return &ss, nil
+}
+
+func (s *MemoryStore) DeleteSnapshot(streamId StreamId) error {
+	delete(s.state.snapshots, streamId)
+	return nil
 }
 
 func (s MemoryStore) SaveEvents(args SaveEventArgs) error {
@@ -34,6 +43,7 @@ func (s MemoryStore) SaveEvents(args SaveEventArgs) error {
 	correlationId := args.CorrelationId
 	causationId := args.CausationId
 	metadata := args.Metadata
+	snapshot := args.Snapshot
 
 	state := s.state
 	stream, streamExists := state.streams[streamId]
@@ -46,16 +56,19 @@ func (s MemoryStore) SaveEvents(args SaveEventArgs) error {
 		streamEvents = []PersistedEvent{}
 	}
 	endVersion := stream.Version + Version(len(events))
-	if expectedVersion != nil && *expectedVersion != Version(endVersion) {
+	if expectedVersion != Version(endVersion) {
 		return errors.New(fmt.Sprintln("Unexpected version. expected", expectedVersion, "actual", endVersion))
 	}
 	for _, evt := range events {
 		seq := Sequence(state.sequence.Add(1))
-		pe := evt.ToPersistedEvent(stream.StreamId, seq, seq, 
-			stream.Version + 1, correlationId, causationId, metadata)
+		pe := evt.ToPersistedEvent(stream.StreamId, seq, seq,
+			stream.Version+1, correlationId, causationId, metadata)
 		streamEvents = append(streamEvents, pe)
 		state.events = append(state.events, pe)
 		stream.Version++
+	}
+	if snapshot != nil {
+		state.snapshots[streamId] =  *snapshot
 	}
 	if !streamExists {
 		state.streams[streamId] = stream
@@ -94,7 +107,7 @@ func (s MemoryStore) LoadEvents(
 		if toSequence != 0 && evt.Sequence > toSequence {
 			return false
 		}
-		if streamId.Id != ""  && evt.StreamId != streamId {
+		if streamId.Id != "" && evt.StreamId != streamId {
 			return false
 		}
 		return true

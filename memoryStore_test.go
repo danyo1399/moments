@@ -3,13 +3,17 @@ package moments
 import (
 	"fmt"
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 )
 
-func createSession(t *testing.T) *Session {
+func createEventSourcedSession(t *testing.T) *Session {
+	config := Config{Aggregates: map[AggregateType]AggregateConfig{
+		"Calculator": {StoreStrategy: EventSourced},
+	}}
 	var provider StoreProvider = NewMemoryStoreProvider()
-	provider.CreateTenant("default")
-	sessionProvider := NewSessionProvider(provider)
+	provider.NewTenant("default")
+	sessionProvider := NewSessionProvider(provider, config)
 	session, err := sessionProvider.NewSession("default")
 	if err != nil {
 		t.Error(err)
@@ -17,8 +21,56 @@ func createSession(t *testing.T) *Session {
 	return session
 }
 
+func createSnapshotSession(t *testing.T) *Session {
+	config := Config{Aggregates: map[AggregateType]AggregateConfig{
+		"Calculator": {StoreStrategy: AlwaysSnapshot},
+	}}
+	var provider StoreProvider = NewMemoryStoreProvider()
+	provider.NewTenant("default")
+	sessionProvider := NewSessionProvider(provider, config)
+	session, err := sessionProvider.NewSession("default")
+	if err != nil {
+		t.Error(err)
+	}
+	return session
+}
+
+func TestLoadAndSaveSnapshot(t *testing.T) {
+	session := createSnapshotSession(t)
+	id := "123"
+	(func() {
+		calc := NewCalculator(id)
+		calc.Update(5)
+		calc.Add(2)
+		err := session.Save(calc)
+		assert.Nil(t, err)
+	})()
+
+	loadedCalc := NewCalculator(id)
+	err := session.LoadAggregate(loadedCalc)
+	assert.Nil(t, err)
+	assert.Equal(t, 7, loadedCalc.State().Value)
+	assert.Equal(t, Version(2), loadedCalc.Version())
+
+	defer session.Close()
+}
+
+func TestAggregateHasNoUpdates_LoadAggregate_NoChanges(t *testing.T) {
+	session := createEventSourcedSession(t)
+	calc := NewCalculator("")
+	calc.Update(5)
+	err := session.Save(calc)
+	assert.Nil(t, err)
+
+	err = session.LoadAggregate(calc)
+	assert.Nil(t, err)
+	assert.Equal(t, 5, calc.State().Value)
+
+	defer session.Close()
+}
+
 func TestShouldNotSaveWhenNoEvents(t *testing.T) {
-	session := createSession(t)
+	session := createEventSourcedSession(t)
 	calc := NewCalculator("")
 	err := session.Save(calc)
 	assert.NotNil(t, err)
@@ -27,7 +79,7 @@ func TestShouldNotSaveWhenNoEvents(t *testing.T) {
 }
 
 func TestSaveAggregate(t *testing.T) {
-	session := createSession(t)
+	session := createEventSourcedSession(t)
 	calc := NewCalculator("")
 	calc.Update(5)
 	calc.Add(10)
@@ -43,7 +95,7 @@ func TestSaveAggregate(t *testing.T) {
 }
 
 func TestUpdateMetadata(t *testing.T) {
-	session := createSession(t)
+	session := createEventSourcedSession(t)
 	session.CorrelationId = "corr"
 	session.CausationId = "caus"
 	session.Metadata["key"] = "value"
@@ -71,7 +123,7 @@ func TestUpdateMetadata(t *testing.T) {
 }
 
 func TestLoadAndSave(t *testing.T) {
-	session := createSession(t)
+	session := createEventSourcedSession(t)
 	calc := NewCalculator("")
 	calc.Update(5)
 	calc.Add(10)

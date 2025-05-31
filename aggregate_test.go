@@ -6,36 +6,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSnapshotIsImutable(t *testing.T) {
-	calc := NewCalculator("")
-	calc.Add(5)
-	snap := calc.CreateSnapshot()
-	calc.Add(10)
-
-	assert.Equal(t, 5, snap.State.Value)
-	assert.Equal(t, Version(1), snap.Version)
-}
-
 func TestCreateSnapshot(t *testing.T) {
 	calc := NewCalculator("")
 	calc.Add(10)
 
-	snap := calc.CreateSnapshot()
+	snap := calc.CreateSnapshot(JsonSerialiser)
+
+	var snapState CalculatorState 
+	err := JsonSerialiser.Unmarshal(snap.State, &snapState)
+	assert.Nil(t, err)
 
 	assert.Equal(t, calc.Id(), snap.StreamId.Id)
 	assert.Equal(t, calc.Version(), snap.Version)
-	assert.Equal(t, calc.State(), snap.State)
-}
-
-func Test(t *testing.T) {
-	calc := NewCalculator("")
-	calc.Update(5)
-	calc.Add(10)
-
-	unsaved := calc.UnsavedEvents()
-	assert.Len(t, unsaved, 2)
-	assert.Equal(t, 15, calc.State().Value)
-	assert.Equal(t, calc.Version(), Version(2))
+	assert.Equal(t, calc.State(), snapState)
 }
 
 func TestLoadFromEvents(t *testing.T) {

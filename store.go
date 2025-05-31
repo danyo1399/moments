@@ -15,15 +15,16 @@ type SaveEventArgs struct {
 	CorrelationId   CorrelationId
 	CausationId     CausationId
 	Metadata        Metadata
-	ExpectedVersion *Version
+	ExpectedVersion Version
+	Snapshot  *Snapshot 
 }
-
 type Store interface {
 	SaveEvents(
 		args SaveEventArgs,
 	) error
 	LoadEvents(options LoadEventsOptions) ([]PersistedEvent, error)
-	SaveSnapshot(snapshot Snapshot[any]) error
-	LoadSnpashot(streamId StreamId) (Snapshot[any], error)
+	SaveSnapshot(snapshot *Snapshot) error
+	LoadSnapshot(streamId StreamId) (*Snapshot, error) 
+	DeleteSnapshot(streamId StreamId) error
 	Close()
 }
