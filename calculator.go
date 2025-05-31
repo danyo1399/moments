@@ -18,15 +18,15 @@ type subtracted struct {
 type CalculatorState struct {
 	Value int
 }
-type Calculator struct {
+type calculator struct {
 	Aggregate[CalculatorState]
 }
 
-const CalculatorType AggregateType = "Calculator"
+const calculatorType AggregateType = "Calculator"
 var initStateFunc = func() CalculatorState {
 	return CalculatorState{0}
 }
-var newCalculatorAggregate = NewAggregateFactory(CalculatorType, initStateFunc, reducer)
+var newCalculatorAggregate = NewAggregateFactory(calculatorType, initStateFunc, reducer)
 
 func reducer(state CalculatorState, events ...any) CalculatorState {
 	for _, event := range events {
@@ -44,33 +44,33 @@ func reducer(state CalculatorState, events ...any) CalculatorState {
 	return state
 }
 
-func (c *Calculator) Subtract(val int) {
+func (c *calculator) subtract(val int) {
 	evt := subtracted{val}
 	c.Apply(evt, nil)
 }
 
-func (c *Calculator) Update(val int) {
+func (c *calculator) update(val int) {
 	evt := updated{val}
 	c.Apply(evt, nil)
 }
 
-func (c *Calculator) Add(val int) {
+func (c *calculator) add(val int) {
 	evt := added{val}
 	c.Apply(evt, nil)
 }
 
-func NewCalculatorFromEvents(id string, events []any) *Calculator {
+func NewCalculatorFromEvents(id string, events []any) *calculator {
 	agg := newCalculatorAggregate(WithEvents[CalculatorState](id, events))
-	calculator := Calculator{
+	calculator := calculator{
 		Aggregate: *agg,
 	}
 	return &calculator
 }
 
-func NewCalculator(id string) *Calculator {
+func NewCalculator(id string) *calculator {
 
 	agg := newCalculatorAggregate(WithId[CalculatorState](id))
-	calculator := Calculator{
+	calculator := calculator{
 		Aggregate: *agg,
 	}
 	return &calculator

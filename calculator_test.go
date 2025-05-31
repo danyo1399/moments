@@ -12,8 +12,8 @@ func TestCalculator(t *testing.T) {
 
 func TestCalculatorCalculate(t *testing.T) {
 	calculator := NewCalculator("")
-	calculator.Update(5)
-	calculator.Add(10)
-	calculator.Subtract(3)
+	calculator.update(5)
+	calculator.add(10)
+	calculator.subtract(3)
 	assert.Equal(t, 12, calculator.State().Value)
 }

@@ -9,7 +9,7 @@ import (
 
 func createEventSourcedSession(t *testing.T) *Session {
 	config := Config{Aggregates: map[AggregateType]AggregateConfig{
-		"Calculator": {StoreStrategy: EventSourced},
+		"Calculator": {StoreStrategy: eventSourced},
 	}}
 	var provider StoreProvider = NewMemoryStoreProvider()
 	provider.NewTenant("default")
@@ -23,7 +23,7 @@ func createEventSourcedSession(t *testing.T) *Session {
 
 func createSnapshotSession(t *testing.T) *Session {
 	config := Config{Aggregates: map[AggregateType]AggregateConfig{
-		"Calculator": {StoreStrategy: AlwaysSnapshot},
+		"Calculator": {StoreStrategy: alwaysSnapshot},
 	}}
 	var provider StoreProvider = NewMemoryStoreProvider()
 	provider.NewTenant("default")
@@ -40,8 +40,8 @@ func TestLoadAndSaveSnapshot(t *testing.T) {
 	id := "123"
 	(func() {
 		calc := NewCalculator(id)
-		calc.Update(5)
-		calc.Add(2)
+		calc.update(5)
+		calc.add(2)
 		err := session.Save(calc)
 		assert.Nil(t, err)
 	})()
@@ -58,7 +58,7 @@ func TestLoadAndSaveSnapshot(t *testing.T) {
 func TestAggregateHasNoUpdates_LoadAggregate_NoChanges(t *testing.T) {
 	session := createEventSourcedSession(t)
 	calc := NewCalculator("")
-	calc.Update(5)
+	calc.update(5)
 	err := session.Save(calc)
 	assert.Nil(t, err)
 
@@ -81,8 +81,8 @@ func TestShouldNotSaveWhenNoEvents(t *testing.T) {
 func TestSaveAggregate(t *testing.T) {
 	session := createEventSourcedSession(t)
 	calc := NewCalculator("")
-	calc.Update(5)
-	calc.Add(10)
+	calc.update(5)
+	calc.add(10)
 
 	err := session.Save(calc)
 	assert.Nil(t, err)
@@ -100,8 +100,8 @@ func TestUpdateMetadata(t *testing.T) {
 	session.CausationId = "caus"
 	session.Metadata["key"] = "value"
 	calc := NewCalculator("")
-	calc.Update(5)
-	calc.Add(10)
+	calc.update(5)
+	calc.add(10)
 
 	err := session.Save(calc)
 	assert.Nil(t, err)
@@ -125,8 +125,8 @@ func TestUpdateMetadata(t *testing.T) {
 func TestLoadAndSave(t *testing.T) {
 	session := createEventSourcedSession(t)
 	calc := NewCalculator("")
-	calc.Update(5)
-	calc.Add(10)
+	calc.update(5)
+	calc.add(10)
 
 	err := session.Save(calc)
 	assert.Nil(t, err)
@@ -139,7 +139,7 @@ func TestLoadAndSave(t *testing.T) {
 		t.Fail()
 	}
 	loadedCalc := NewCalculatorFromEvents(
-		calc.StreamId().String(), AnySlice(loadedEvents))
+		calc.StreamId().String(), anySlice(loadedEvents))
 	if err != nil {
 		t.Log("Should load events", err)
 		t.Fail()

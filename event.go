@@ -8,6 +8,7 @@ type (
 	CorrelationId string
 	CausationId   string
 	EventType     string
+	EventId       string
 	Metadata      map[string]any
 )
 
@@ -23,27 +24,14 @@ type PersistedEvent struct {
 	Version        Version
 }
 
-type EventDataVersion struct {
-	Version Version
-	Data    any
-}
-
 type Event struct {
-	EventId   string
+	EventId   EventId
 	Data      any
 	Timestamp time.Time
 }
 
-type EventSlice struct {
-	Events []Event
-}
-
-type PersistedEventSlice struct {
-	Events []PersistedEvent
-}
-
 type ApplyArgs struct {
-	EventId   string
+	EventId   EventId
 	Timestamp time.Time
 }
 
@@ -51,9 +39,9 @@ func NewEvent(data any, args *ApplyArgs) Event {
 	if args == nil {
 		args = &ApplyArgs{}
 	}
-	eventId := NewSquentialString()
+	eventId := newSquentialString()
 	evt := Event{
-		EventId:   DefaultIfEmpty(&args.EventId, eventId),
+		EventId:   defaultIfEmpty(&args.EventId, EventId(eventId)),
 		Timestamp: time.Now(),
 		Data:      data,
 	}
@@ -64,7 +52,6 @@ func (e *PersistedEvent) ToEvent() Event {
 	return Event{Data: e.Data, EventId: e.EventId, Timestamp: e.Timestamp}
 }
 
-
 func (e *Event) ToPersistedEvent(
 	streamId StreamId, sequence Sequence, globalSequence Sequence,
 	version Version, correlationId CorrelationId,
@@ -74,7 +61,7 @@ func (e *Event) ToPersistedEvent(
 		StreamId:       streamId,
 		Sequence:       sequence,
 		GlobalSequence: globalSequence,
-		EventType:      EventType(TypeName(e.Data)),
+		EventType:      EventType(typeName(e.Data)),
 		Version:        version,
 		CorrelationId:  correlationId,
 		CausationId:    causationId,
@@ -88,10 +75,3 @@ func (e *Event) ToPersistedEvent(
 	return r
 }
 
-type EventHeader struct {
-	EventId       string
-	EventType     string
-	CausationId   string
-	CorrelationId string
-	Metadata      map[string]any
-}

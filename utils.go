@@ -9,20 +9,21 @@ import (
 	"github.com/google/uuid"
 )
 
-func DefaultIfNil[T any](value *T, defaultValue T) T {
+func defaultIfNil[T any](value *T, defaultValue T) T {
 	if value != nil {
 		return *value
 	}
 	return defaultValue
 }
 
-func DefaultIfEmpty[T any](value *T, defaultValue T) T {
-	if !IsEmpty(value) {
+func defaultIfEmpty[T any](value *T, defaultValue T) T {
+	if !isEmpty(value) {
 		return *value
 	}
 	return defaultValue
 }
-func DeepCopyJson[T any](src T) T {
+
+func deepCopyJson[T any](src T) T {
 	var dest T
 	bytes, err := json.Marshal(src)
 	if err != nil {
@@ -35,7 +36,7 @@ func DeepCopyJson[T any](src T) T {
 	return dest
 }
 
-func FilterSlice[T any](input []T, fn func(a T) bool) []T {
+func filterSlice[T any](input []T, fn func(a T) bool) []T {
 	output := make([]T, 0)
 	for _, item := range input {
 		if fn(item) {
@@ -45,8 +46,8 @@ func FilterSlice[T any](input []T, fn func(a T) bool) []T {
 	return output
 }
 
-// AnySlice converts a slice of any type to a slice of any type
-func AnySlice[T any](slice []T) []any {
+// anySlice converts a slice of any type to a slice of any type
+func anySlice[T any](slice []T) []any {
 	result := make([]any, len(slice))
 	for i, v := range slice {
 		result[i] = v
@@ -54,13 +55,9 @@ func AnySlice[T any](slice []T) []any {
 	return result
 }
 
-func NewRandomUuidString() string {
-	return uuid.NewString()
-}
-
-// NewSequentialUUIDString returns a new UUID string that is formatted as a UUID v7 string.
+// newSequentialUUIDString returns a new UUID string that is formatted as a UUID v7 string.
 // UUID v7 is a time ordered UUID
-func NewSequentialUUIDString() string {
+func newSequentialUUIDString() string {
 	id, err := uuid.NewV7()
 	if err != nil {
 		panic(err)
@@ -68,13 +65,13 @@ func NewSequentialUUIDString() string {
 	return id.String()
 }
 
-// NewSquentialString returns a new UUID string that is formatted as a UUID v7 string.
+// newSquentialString returns a new UUID string that is formatted as a UUID v7 string.
 // UUID v7 is a time ordered UUID
-func NewSquentialString() string {
-	return strings.ReplaceAll(NewSequentialUUIDString(), "-", "")
+func newSquentialString() string {
+	return strings.ReplaceAll(newSequentialUUIDString(), "-", "")
 }
 
-func MapSlice[TIn any, TOut any](input []TIn, mapFn func(a TIn) TOut) []TOut {
+func mapSlice[TIn any, TOut any](input []TIn, mapFn func(a TIn) TOut) []TOut {
 	output := make([]TOut, len(input))
 	for i, item := range input {
 		output[i] = mapFn(item)
@@ -82,8 +79,7 @@ func MapSlice[TIn any, TOut any](input []TIn, mapFn func(a TIn) TOut) []TOut {
 	return output
 }
 
-func IsEmpty(object interface{}) bool {
-
+func isEmpty(object interface{}) bool {
 	// get nil case out of the way
 	if object == nil {
 		return true
@@ -101,7 +97,7 @@ func IsEmpty(object interface{}) bool {
 			return true
 		}
 		deref := objValue.Elem().Interface()
-		return IsEmpty(deref)
+		return isEmpty(deref)
 	// for all other types, compare against the zero value
 	// array types are empty when they match their zero-initialized state
 	default:
@@ -110,7 +106,7 @@ func IsEmpty(object interface{}) bool {
 	}
 }
 
-func TypeName(value any) string {
+func typeName(value any) string {
 	ty := reflect.TypeOf(value)
 	pkg := path.Base(ty.PkgPath())
 	if pkg == "." {

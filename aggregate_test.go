@@ -8,7 +8,7 @@ import (
 
 func TestCreateSnapshot(t *testing.T) {
 	calc := NewCalculator("")
-	calc.Add(10)
+	calc.add(10)
 
 	snap := calc.CreateSnapshot(JsonSerialiser)
 
@@ -23,19 +23,19 @@ func TestCreateSnapshot(t *testing.T) {
 
 func TestLoadFromEvents(t *testing.T) {
 	calc := NewCalculator("")
-	calc.Update(5)
-	calc.Add(10)
+	calc.update(5)
+	calc.add(10)
 	events := calc.UnsavedEvents()
 
-	calc2 := NewCalculatorFromEvents("2", AnySlice(events))
+	calc2 := NewCalculatorFromEvents("2", anySlice(events))
 	assert.Equal(t, 15, calc2.State().Value)
 }
 
 func TestAppendEvents(t *testing.T) {
 	calc := NewCalculator("")
 	assert.Equal(t, 0, calc.State().Value)
-	calc.Add(10)
-	calc.Subtract(3)
+	calc.add(10)
+	calc.subtract(3)
 
 	evt1 := calc.UnsavedEvents()[0]
 	unsavedEvents := calc.UnsavedEvents()
@@ -44,7 +44,7 @@ func TestAppendEvents(t *testing.T) {
 	assert.Equal(t, 2, len(unsavedEvents))
 	assert.NotEmpty(t, evt1.EventId)
 	assert.NotEmpty(t, evt1.Timestamp)
-	assert.Equal(t, TypeName(evt1.Data), "moments.added")
+	assert.Equal(t, typeName(evt1.Data), "moments.added")
 	// assert.NotEmpty(t, evt1.CorrelationId)
 }
 
@@ -61,13 +61,13 @@ func TestIdNotSame(t *testing.T) {
 
 func TestLoadAggregate(t *testing.T) {
 	calc := NewCalculator("")
-	calc.Update(10)
-	calc.Subtract(3)
+	calc.update(10)
+	calc.subtract(3)
 
 	calc2 := NewCalculator("")
 	fmt.Println(calc.UnsavedEvents())
 
-	calc2.Load(AnySlice(calc.UnsavedEvents()))
+	calc2.Load(anySlice(calc.UnsavedEvents()))
 
 	assert.NotEqual(t, calc.Id(), calc2.Id())
 	assert.Equal(t, Version(2), calc2.Version())

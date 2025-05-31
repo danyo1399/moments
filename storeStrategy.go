@@ -1,37 +1,37 @@
 package moments
 
-type StoreStrategyType int
+type storeStrategyType int
 
 const (
-	EventSourced StoreStrategyType = iota
-	AlwaysSnapshot
+	eventSourced storeStrategyType = iota
+	alwaysSnapshot
 )
 
-func (a StoreStrategyType) String() string {
+func (a storeStrategyType) String() string {
 	switch a {
-	case EventSourced:
+	case eventSourced:
 		return "EventSourced"
-	case AlwaysSnapshot:
+	case alwaysSnapshot:
 		return "AlwaysSnapshot"
 	default:
 		return "Unknown"
 	}
 }
 
-type IStoreStrategy interface {
-	Load(aggregate IAggregate, session *Session) error
-	Save(aggregate IAggregate, session *Session) error
+type storeStrategy interface {
+	load(aggregate IAggregate, session *Session) error
+	save(aggregate IAggregate, session *Session) error
 }
 
-// StoreStrategies is a map of StoreStrategyType to IStoreStrategy
-var StoreStrategies = map[StoreStrategyType]IStoreStrategy{
-	EventSourced:   &EventSourcedPersistenceStrategy{},
-	AlwaysSnapshot: &SnapshotStoreStrategy{},
+// storeStrategies is a map of StoreStrategyType to IStoreStrategy
+var storeStrategies = map[storeStrategyType]storeStrategy{
+	eventSourced:   &eventSourcedPersistenceStrategy{},
+	alwaysSnapshot: &snapshotStoreStrategy{},
 }
 
-type EventSourcedPersistenceStrategy struct{}
+type eventSourcedPersistenceStrategy struct{}
 
-func (s *EventSourcedPersistenceStrategy) Load(aggregate IAggregate, session *Session) error {
+func (s *eventSourcedPersistenceStrategy) load(aggregate IAggregate, session *Session) error {
 	streamId := aggregate.StreamId()
 	fromVersion := aggregate.Version() + Version(1)
 	events, err := session.LoadEvents(LoadEventsOptions{
@@ -41,11 +41,11 @@ func (s *EventSourcedPersistenceStrategy) Load(aggregate IAggregate, session *Se
 	if err != nil {
 		return err
 	}
-	aggregate.Load(AnySlice(events))
+	aggregate.Load(anySlice(events))
 	return nil
 }
 
-func (s *EventSourcedPersistenceStrategy) Save(agg IAggregate, session *Session) error {
+func (s *eventSourcedPersistenceStrategy) save(agg IAggregate, session *Session) error {
 	events := agg.UnsavedEvents()
 
 	version := agg.Version()
@@ -57,9 +57,9 @@ func (s *EventSourcedPersistenceStrategy) Save(agg IAggregate, session *Session)
 	return nil
 }
 
-type SnapshotStoreStrategy struct{}
+type snapshotStoreStrategy struct{}
 
-func (s *SnapshotStoreStrategy) Load(aggregate IAggregate, session *Session) error {
+func (s *snapshotStoreStrategy) load(aggregate IAggregate, session *Session) error {
 	streamId := aggregate.StreamId()
 	state, err := session.Store.LoadSnapshot(streamId)
 	if err != nil {
@@ -76,11 +76,11 @@ func (s *SnapshotStoreStrategy) Load(aggregate IAggregate, session *Session) err
 	if err != nil {
 		return err
 	}
-	aggregate.Load(AnySlice(events))
+	aggregate.Load(anySlice(events))
 	return nil
 }
 
-func (s *SnapshotStoreStrategy) Save(agg IAggregate, session *Session) error {
+func (s *snapshotStoreStrategy) save(agg IAggregate, session *Session) error {
 	events := agg.UnsavedEvents()
 	if len(events) == 0 {
 		return nil

@@ -5,6 +5,6 @@ type Config struct {
 	Serialiser *SnapshotSerialiser
 }
 type AggregateConfig struct {
-	StoreStrategy     StoreStrategyType
+	StoreStrategy     storeStrategyType
 	SnapshotFrequency int
 }

@@ -8,18 +8,18 @@ import (
 
 func TestLoadAndSaveSnapStrategy(t *testing.T) {
 	session := createSnapshotSession(t)
-	strat := StoreStrategies[AlwaysSnapshot]
+	strat := storeStrategies[alwaysSnapshot]
 	id := "123"
 	(func() {
 		calc := NewCalculator(id)
-		calc.Update(5)
-		calc.Add(2)
-		err := strat.Save(calc, session)
+		calc.update(5)
+		calc.add(2)
+		err := strat.save(calc, session)
 		assert.Nil(t, err)
 	})()
 
 	loadedCalc := NewCalculator(id)
-	err := strat.Load(loadedCalc, session)
+	err := strat.load(loadedCalc, session)
 	assert.Nil(t, err)
 	assert.Equal(t, 7, loadedCalc.State().Value)
 	assert.Equal(t, Version(2), loadedCalc.Version())

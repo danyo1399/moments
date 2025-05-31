@@ -16,7 +16,7 @@ type Session struct {
 	Metadata      Metadata
 	tenant        string
 	config        Config
-	persister     IStoreStrategy
+	persister     storeStrategy
 }
 
 func NewSessionProvider(storeProvider StoreProvider, config Config) SessionProvider {
@@ -57,11 +57,11 @@ func (s *Session) LoadAggregate(aggregate IAggregate) error {
 	}
 	aggregateStrategy := aggregateConfig.StoreStrategy
 
-	storeStrategy, ok := StoreStrategies[aggregateStrategy]
+	storeStrategy, ok := storeStrategies[aggregateStrategy]
 	if !ok {
 		return errors.New(fmt.Sprintln("Unknown store strategy", aggregateStrategy))
 	}
-	return storeStrategy.Load(aggregate, s)
+	return storeStrategy.load(aggregate, s)
 }
 
 func (s *Session) Save(aggregate IAggregate) error {
@@ -71,11 +71,11 @@ func (s *Session) Save(aggregate IAggregate) error {
 	}
 	aggregateStrategy := aggregateConfig.StoreStrategy
 
-	storeStrategy, ok := StoreStrategies[aggregateStrategy]
+	storeStrategy, ok := storeStrategies[aggregateStrategy]
 	if !ok {
 		return errors.New(fmt.Sprintln("Unknown store strategy", aggregateStrategy))
 	}
-	return storeStrategy.Save(aggregate, s)
+	return storeStrategy.save(aggregate, s)
 }
 
 func (s *Session) newSaveEventArgs(streamId StreamId, events []Event, expectedVersion Version) SaveEventArgs {

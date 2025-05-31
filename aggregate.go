@@ -142,7 +142,7 @@ func (a *Aggregate[TState]) Load(events []any) {
 		case Event:
 			ed = append(ed, evt)
 		default:
-			panic(fmt.Sprintln("unknown event type", evt))
+			ed = append(ed, NewEvent(evt, nil))
 		}
 	}
 	a.load(ed)
@@ -151,7 +151,7 @@ func (a *Aggregate[TState]) Load(events []any) {
 // load is an internal method that applies a slice of Event objects to the aggregate.
 // It extracts the data from each event, applies it using the reducer, and updates the version.
 func (a *Aggregate[T]) load(events []Event) {
-	ed := MapSlice(events, func(e Event) any {
+	ed := mapSlice(events, func(e Event) any {
 		return e.Data
 	})
 
@@ -229,7 +229,7 @@ func newAggregate[T any](aggregateType AggregateType, initial T, reducer Reducer
 		state:         initial,
 		reducer:       reducer,
 		version:       0,
-		id:            NewSquentialString(),
+		id:            newSquentialString(),
 	}
 	for _, opt := range opts {
 		opt(&a)

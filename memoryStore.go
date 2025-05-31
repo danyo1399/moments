@@ -94,7 +94,7 @@ func (s MemoryStore) LoadEvents(
 	if events == nil {
 		return []PersistedEvent{}, nil
 	}
-	re := FilterSlice(events, func(evt PersistedEvent) bool {
+	re := filterSlice(events, func(evt PersistedEvent) bool {
 		if fromVersion != 0 && evt.Version < fromVersion {
 			return false
 		}
