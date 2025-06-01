@@ -80,7 +80,7 @@ func (s MemoryStore) SaveEvents(args SaveEventArgs) error {
 }
 
 func (s MemoryStore) LoadEvents(
-	options LoadEventsOptions,
+	options LoadEventsArgs,
 ) ([]PersistedEvent, error) {
 	state := s.state
 	events := state.events

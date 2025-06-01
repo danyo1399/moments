@@ -111,7 +111,7 @@ func TestUpdateMetadata(t *testing.T) {
 	loadedCalc := NewCalculator(calc.Id())
 	err = session.LoadAggregate(&loadedCalc.Aggregate)
 	assert.Nil(t, err)
-	events, err := session.LoadEvents(LoadEventsOptions{StreamId: calc.StreamId()})
+	events, err := session.LoadEvents(LoadEventsArgs{StreamId: calc.StreamId()})
 	assert.Nil(t, err)
 
 	assert.Len(t, events, 2)
