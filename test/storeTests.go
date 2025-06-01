@@ -1,4 +1,4 @@
-package moments
+package test
 
 import (
 	"testing"
