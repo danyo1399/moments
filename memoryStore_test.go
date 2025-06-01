@@ -108,6 +108,10 @@ func TestSaveAggregate(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 15, loadedCalc.State().Value)
 	assert.Len(t, loadedCalc.UnsavedEvents(), 0)
+	assert.Equal(t, calc.version, loadedCalc.version)
+	assert.Equal(t, calc.schemaVersion, loadedCalc.schemaVersion)
+	assert.Equal(t, calc.id, loadedCalc.id)
+	assert.Equal(t, calc.aggregateType, loadedCalc.aggregateType)
 	session.Close()
 }
 
