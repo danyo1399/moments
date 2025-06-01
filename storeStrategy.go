@@ -66,7 +66,7 @@ func (s *snapshotStoreStrategy) load(aggregate IAggregate, session *Session) err
 		return err
 	}
 	if state != nil {
-		aggregate.loadSnapshot(state, session.config.Serialiser)
+		aggregate.loadSnapshot(state, session.config.SnapshotSerialiser)
 	}
 	fromVersion := aggregate.Version() + Version(1)
 	events, err := session.LoadEvents(LoadEventsArgs{
@@ -85,7 +85,7 @@ func (s *snapshotStoreStrategy) save(agg IAggregate, session *Session) error {
 	if len(events) == 0 {
 		return nil
 	}
-	snapshot := agg.Snapshot(session.config.Serialiser)
+	snapshot := agg.Snapshot(session.config.SnapshotSerialiser)
 
 	return session.saveEventsWithSnapshot(
 		agg.StreamId(), events, agg.Version(), &snapshot,

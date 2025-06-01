@@ -1,16 +1,18 @@
 package moments
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 )
 
 type MemoryStore struct {
 	state *MemoryStoreTenantState
+	config *Config
 }
 
-func NewMemoryStore(state *MemoryStoreTenantState) *MemoryStore {
-	s := MemoryStore{state: state}
+func NewMemoryStore(state *MemoryStoreTenantState, config *Config) *MemoryStore {
+	s := MemoryStore{state: state, config: config,}
 	return &s
 }
 
@@ -18,7 +20,7 @@ func (s *MemoryStore) Close() {
 }
 
 func (s *MemoryStore) SaveSnapshot(snapshot *Snapshot) error {
-	streamId := snapshot.StreamId 
+	streamId := snapshot.StreamId
 	s.state.snapshots[streamId] = *snapshot
 	return nil
 }
@@ -26,7 +28,7 @@ func (s *MemoryStore) SaveSnapshot(snapshot *Snapshot) error {
 func (s *MemoryStore) LoadSnapshot(streamId StreamId) (*Snapshot, error) {
 	ss, ok := s.state.snapshots[streamId]
 	if !ok {
-		return nil, nil 
+		return nil, nil
 	}
 	return &ss, nil
 }
@@ -66,9 +68,15 @@ func (s MemoryStore) SaveEvents(args SaveEventArgs) error {
 		streamEvents = append(streamEvents, pe)
 		state.events = append(state.events, pe)
 		stream.Version++
+		data, err := json.Marshal(pe.Data)
+		if err != nil {
+			return err
+		}
+		pe.Data = nil
+		state.eventData[seq] = data
 	}
 	if snapshot != nil {
-		state.snapshots[streamId] =  *snapshot
+		state.snapshots[streamId] = *snapshot
 	}
 	if !streamExists {
 		state.streams[streamId] = stream
@@ -114,6 +122,17 @@ func (s MemoryStore) LoadEvents(
 	})
 	if count != 0 {
 		re = re[:count]
+	}
+	for _, evt := range re {
+		data, ok := state.eventData[evt.Sequence]
+		if !ok {
+			return nil, fmt.Errorf("missing event data for sequence %v", evt.Sequence)
+		}
+		dataValue, err := s.config.EventDeserialiser.Deserialise(evt.EventType, data)
+		if err != nil {
+			return nil, err
+		}
+		evt.Data = dataValue
 	}
 	return re, nil
 }

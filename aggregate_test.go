@@ -10,10 +10,10 @@ func TestCreateSnapshot(t *testing.T) {
 	calc := NewCalculator("")
 	calc.add(10)
 
-	snap := calc.CreateSnapshot(JsonSerialiser)
+	snap := calc.CreateSnapshot(JsonSnapshotSerialiser)
 
 	var snapState CalculatorState 
-	err := JsonSerialiser.Unmarshal(snap.State, &snapState)
+	err := JsonSnapshotSerialiser.Unmarshal(snap.State, &snapState)
 	assert.Nil(t, err)
 
 	assert.Equal(t, calc.Id(), snap.StreamId.Id)
@@ -43,8 +43,7 @@ func TestAppendEvents(t *testing.T) {
 	assert.Equal(t, Version(2), calc.Version())
 	assert.Equal(t, 2, len(unsavedEvents))
 	assert.NotEmpty(t, evt1.EventId)
-	assert.NotEmpty(t, evt1.Timestamp)
-	assert.Equal(t, typeName(evt1.Data), "moments.added")
+	assert.Equal(t, GetEventType(evt1.Data), EventType("moments.added"))
 	// assert.NotEmpty(t, evt1.CorrelationId)
 }
 

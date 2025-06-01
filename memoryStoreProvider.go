@@ -7,11 +7,15 @@ import (
 )
 
 type MemoryStoreProvider struct {
-	state *MemoryStoreState
+	state  *MemoryStoreState
+	config *Config
 }
 
-func NewMemoryStoreProvider() MemoryStoreProvider {
-	return MemoryStoreProvider{state: &MemoryStoreState{tenants: map[string]*MemoryStoreTenantState{}}}
+func NewMemoryStoreProvider(config *Config) MemoryStoreProvider {
+	return MemoryStoreProvider{
+		state:  &MemoryStoreState{tenants: map[string]*MemoryStoreTenantState{}},
+		config: config,
+	}
 }
 
 func (p MemoryStoreProvider) NewTenant(tenant string) error {
@@ -25,6 +29,7 @@ func (p MemoryStoreProvider) NewTenant(tenant string) error {
 		events:    []PersistedEvent{},
 		sequence:  atomic.Uint64{},
 		snapshots: map[StreamId]Snapshot{},
+		eventData: make(map[Sequence][]byte),
 	}
 	return nil
 }
@@ -40,7 +45,7 @@ func (p MemoryStoreProvider) GetStore(tenant string) (Store, error) {
 	if !exists {
 		return nil, errors.New(fmt.Sprintln("Tenant doesnt exist", tenant))
 	}
-	store := NewMemoryStore(tenantState)
+	store := NewMemoryStore(tenantState, p.config)
 	return store, nil
 }
 

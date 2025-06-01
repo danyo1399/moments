@@ -15,7 +15,7 @@ type SnapshotSerialiser struct {
 	Unmarshal func(data []byte, v any) error
 }
 
-var JsonSerialiser SnapshotSerialiser = SnapshotSerialiser{
+var JsonSnapshotSerialiser SnapshotSerialiser = SnapshotSerialiser{
 	Marshal: func(v any) ([]byte, error) {
 		return json.Marshal(v)
 	},

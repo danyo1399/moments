@@ -20,8 +20,8 @@ type Session struct {
 }
 
 func NewSessionProvider(storeProvider StoreProvider, config Config) SessionProvider {
-	if config.Serialiser == nil {
-		config.Serialiser = &JsonSerialiser
+	if config.SnapshotSerialiser == nil {
+		config.SnapshotSerialiser = &JsonSnapshotSerialiser
 	}
 	return SessionProvider{
 		StoreProvider: storeProvider,

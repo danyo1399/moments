@@ -2,7 +2,6 @@ package moments
 
 import (
 	"encoding/json"
-	"path"
 	"reflect"
 	"strings"
 
@@ -106,11 +105,3 @@ func isEmpty(object interface{}) bool {
 	}
 }
 
-func typeName(value any) string {
-	ty := reflect.TypeOf(value)
-	pkg := path.Base(ty.PkgPath())
-	if pkg == "." {
-		return ty.Name()
-	}
-	return pkg + "." + ty.Name()
-}

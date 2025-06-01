@@ -2,7 +2,9 @@ package moments
 
 type Config struct {
 	Aggregates map[AggregateType]AggregateConfig
-	Serialiser *SnapshotSerialiser
+	SnapshotSerialiser *SnapshotSerialiser
+	EventDeserialiser *EventDeserialiserConfig
+
 }
 type AggregateConfig struct {
 	StoreStrategy     storeStrategyType
