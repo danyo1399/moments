@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLoadAndSaveSnapStrategy(t *testing.T) {
+func TestLoadAndSaveSnapshotStrategy(t *testing.T) {
 	session := createSnapshotSession(t)
 	strat := storeStrategies[alwaysSnapshot]
 	id := "123"
