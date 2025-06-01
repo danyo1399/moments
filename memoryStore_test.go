@@ -56,14 +56,14 @@ func TestLoadAndSaveSnapshot(t *testing.T) {
 	session := createSnapshotSession(t)
 	id := "123"
 	(func() {
-		calc := NewCalculator(id)
+		calc := newCalculator(id)
 		calc.update(5)
 		calc.add(2)
 		err := session.Save(calc)
 		assert.Nil(t, err)
 	})()
 
-	loadedCalc := NewCalculator(id)
+	loadedCalc := newCalculator(id)
 	err := session.LoadAggregate(loadedCalc)
 	assert.Nil(t, err)
 	assert.Equal(t, 7, loadedCalc.State().Value)
@@ -74,7 +74,7 @@ func TestLoadAndSaveSnapshot(t *testing.T) {
 
 func TestAggregateHasNoUpdates_LoadAggregate_NoChanges(t *testing.T) {
 	session := createEventSourcedSession(t)
-	calc := NewCalculator("")
+	calc := newCalculator("")
 	calc.update(5)
 	err := session.Save(calc)
 	assert.Nil(t, err)
@@ -88,7 +88,7 @@ func TestAggregateHasNoUpdates_LoadAggregate_NoChanges(t *testing.T) {
 
 func TestShouldNotSaveWhenNoEvents(t *testing.T) {
 	session := createEventSourcedSession(t)
-	calc := NewCalculator("")
+	calc := newCalculator("")
 	err := session.Save(calc)
 	assert.NotNil(t, err)
 
@@ -97,13 +97,13 @@ func TestShouldNotSaveWhenNoEvents(t *testing.T) {
 
 func TestSaveAggregate(t *testing.T) {
 	session := createEventSourcedSession(t)
-	calc := NewCalculator("")
+	calc := newCalculator("")
 	calc.update(5)
 	calc.add(10)
 
 	err := session.Save(calc)
 	assert.Nil(t, err)
-	loadedCalc := NewCalculator(calc.id)
+	loadedCalc := newCalculator(calc.id)
 	err = session.LoadAggregate(&loadedCalc.Aggregate)
 	assert.Nil(t, err)
 	assert.Equal(t, 15, loadedCalc.State().Value)
@@ -120,7 +120,7 @@ func TestUpdateMetadata(t *testing.T) {
 	session.CorrelationId = "corr"
 	session.CausationId = "caus"
 	session.Metadata["key"] = "value"
-	calc := NewCalculator("")
+	calc := newCalculator("")
 	calc.update(5)
 	calc.add(10)
 
@@ -129,7 +129,7 @@ func TestUpdateMetadata(t *testing.T) {
 
 	fmt.Printf("%+v\n", calc.StreamId())
 
-	loadedCalc := NewCalculator(calc.Id())
+	loadedCalc := newCalculator(calc.Id())
 	err = session.LoadAggregate(&loadedCalc.Aggregate)
 	assert.Nil(t, err)
 	events, err := session.LoadEvents(LoadEventsArgs{StreamId: calc.StreamId()})
@@ -145,7 +145,7 @@ func TestUpdateMetadata(t *testing.T) {
 
 func TestLoadAndSave(t *testing.T) {
 	session := createEventSourcedSession(t)
-	calc := NewCalculator("")
+	calc := newCalculator("")
 	calc.update(5)
 	calc.add(10)
 
@@ -159,7 +159,7 @@ func TestLoadAndSave(t *testing.T) {
 		t.Log("Should load events")
 		t.Fail()
 	}
-	loadedCalc := NewCalculatorFromEvents(
+	loadedCalc := newCalculatorFromEvents(
 		calc.StreamId().String(), anySlice(loadedEvents))
 	if err != nil {
 		t.Log("Should load events", err)

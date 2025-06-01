@@ -6,14 +6,14 @@ import (
 )
 
 type Added struct {
-	value int
+	Value int
 }
 
 type Updated struct {
-	value int
+	Value int
 }
 type Subtracted struct {
-	value int
+	Value int
 }
 
 type CalculatorState struct {
@@ -33,11 +33,11 @@ func reducer(state CalculatorState, events ...any) CalculatorState {
 	for _, event := range events {
 		switch e := event.(type) {
 		case Added:
-			state.Value += e.value
+			state.Value += e.Value
 		case Subtracted:
-			state.Value -= e.value
+			state.Value -= e.Value
 		case Updated:
-			state.Value = e.value
+			state.Value = e.Value
 		default:
 			panic(fmt.Sprintln("unknown event type", e, event))
 		}

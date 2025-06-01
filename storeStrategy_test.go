@@ -11,14 +11,14 @@ func TestLoadAndSaveSnapshotStrategy(t *testing.T) {
 	strat := storeStrategies[alwaysSnapshot]
 	id := "123"
 	(func() {
-		calc := NewCalculator(id)
+		calc := newCalculator(id)
 		calc.update(5)
 		calc.add(2)
 		err := strat.save(calc, session)
 		assert.Nil(t, err)
 	})()
 
-	loadedCalc := NewCalculator(id)
+	loadedCalc := newCalculator(id)
 	err := strat.load(loadedCalc, session)
 	assert.Nil(t, err)
 	assert.Equal(t, 7, loadedCalc.State().Value)
