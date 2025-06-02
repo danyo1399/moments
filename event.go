@@ -22,12 +22,12 @@ type PersistedEvent struct {
 	Metadata       Metadata
 	EventType      EventType
 	Version        Version
-	Timestamp time.Time
+	Timestamp      time.Time
 }
 
 type Event struct {
-	EventId   EventId
-	Data      any
+	EventId EventId
+	Data    any
 }
 
 type ApplyArgs struct {
@@ -41,14 +41,14 @@ func NewEvent(data any, args *ApplyArgs) Event {
 	}
 	eventId := newSquentialString()
 	evt := Event{
-		EventId:   defaultIfEmpty(&args.EventId, EventId(eventId)),
-		Data:      data,
+		EventId: defaultIfEmpty(&args.EventId, EventId(eventId)),
+		Data:    data,
 	}
 	return evt
 }
 
 func (e *PersistedEvent) ToEvent() Event {
-	return Event{Data: e.Data, EventId: e.EventId }
+	return Event{Data: e.Data, EventId: e.EventId}
 }
 
 func (e *Event) ToPersistedEvent(
@@ -60,17 +60,20 @@ func (e *Event) ToPersistedEvent(
 		StreamId:       streamId,
 		Sequence:       sequence,
 		GlobalSequence: globalSequence,
-		EventType:      GetEventType(e.Data),
+		EventType:      e.EventType(),
 		Version:        version,
 		CorrelationId:  correlationId,
 		CausationId:    causationId,
 		Metadata:       metadata,
-		Timestamp: time.Now(),
+		Timestamp:      time.Now(),
 		Event: Event{
-			EventId:   e.EventId,
-			Data:      e.Data,
+			EventId: e.EventId,
+			Data:    e.Data,
 		},
 	}
 	return r
 }
 
+func (e *Event) EventType() EventType {
+	return GetEventType(e.Data)
+}
