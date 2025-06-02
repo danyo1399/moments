@@ -7,6 +7,7 @@ type LoadEventsArgs struct {
 	ToVersion    Version
 	FromSequence Sequence
 	ToSequence   Sequence
+	descending   bool
 }
 
 type SaveEventArgs struct {
@@ -16,7 +17,7 @@ type SaveEventArgs struct {
 	CausationId     CausationId
 	Metadata        Metadata
 	ExpectedVersion Version
-	Snapshot  *Snapshot 
+	Snapshot        *Snapshot
 }
 type Store interface {
 	SaveEvents(
@@ -24,7 +25,7 @@ type Store interface {
 	) error
 	LoadEvents(options LoadEventsArgs) ([]PersistedEvent, error)
 	SaveSnapshot(snapshot *Snapshot) error
-	LoadSnapshot(streamId StreamId) (*Snapshot, error) 
+	LoadSnapshot(streamId StreamId) (*Snapshot, error)
 	DeleteSnapshot(streamId StreamId) error
 	Close()
 }
