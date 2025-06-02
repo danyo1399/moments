@@ -112,7 +112,7 @@ func (s *Session) saveEventsWithSnapshot(
 }
 
 func (s *Session) LoadStream(streamId StreamId) ([]PersistedEvent, error) {
-	events, err := s.Store.LoadEvents(LoadEventsArgs{StreamId: streamId})
+	events, err := s.Store.LoadEvents(LoadEventArgs{StreamId: streamId})
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (s *Session) LoadStream(streamId StreamId) ([]PersistedEvent, error) {
 }
 
 func (s *Session) LoadEvents(
-	options LoadEventsArgs,
+	options LoadEventArgs,
 ) ([]PersistedEvent, error) {
 	return s.Store.LoadEvents(options)
 }

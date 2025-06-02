@@ -34,7 +34,7 @@ type eventSourcedPersistenceStrategy struct{}
 func (s *eventSourcedPersistenceStrategy) load(aggregate IAggregate, session *Session) error {
 	streamId := aggregate.StreamId()
 	fromVersion := aggregate.Version() + Version(1)
-	events, err := session.LoadEvents(LoadEventsArgs{
+	events, err := session.LoadEvents(LoadEventArgs{
 		StreamId:    streamId,
 		FromVersion: fromVersion,
 	})
@@ -69,7 +69,7 @@ func (s *snapshotStoreStrategy) load(aggregate IAggregate, session *Session) err
 		aggregate.loadSnapshot(state, session.config.SnapshotSerialiser)
 	}
 	fromVersion := aggregate.Version() + Version(1)
-	events, err := session.LoadEvents(LoadEventsArgs{
+	events, err := session.LoadEvents(LoadEventArgs{
 		StreamId:    streamId,
 		FromVersion: fromVersion,
 	})

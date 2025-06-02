@@ -1,6 +1,6 @@
 package moments
 
-type LoadEventsArgs struct {
+type LoadEventArgs struct {
 	StreamId     StreamId
 	Count        uint
 	FromVersion  Version
@@ -23,7 +23,7 @@ type Store interface {
 	SaveEvents(
 		args SaveEventArgs,
 	) error
-	LoadEvents(options LoadEventsArgs) ([]PersistedEvent, error)
+	LoadEvents(options LoadEventArgs) ([]PersistedEvent, error)
 	SaveSnapshot(snapshot *Snapshot) error
 	LoadSnapshot(streamId StreamId) (*Snapshot, error)
 	DeleteSnapshot(streamId StreamId) error
