@@ -7,7 +7,7 @@ type LoadEventsArgs struct {
 	ToVersion    Version
 	FromSequence Sequence
 	ToSequence   Sequence
-	descending   bool
+	Descending   bool
 }
 
 type SaveEventArgs struct {
