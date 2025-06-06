@@ -3,14 +3,18 @@ package moments
 import (
 	"encoding/json"
 	"fmt"
-	"path"
-	"reflect"
 )
 
+type (
+	EventDeserialiserFunc func(data []byte) (any, error)
+	EventDeserialiser     map[EventType]EventDeserialiserFunc
+)
 
-type EventDeserialiser func(data []byte) (any, error)
-type EventDeserialiserConfig map[EventType]EventDeserialiser
-func (c *EventDeserialiserConfig) Deserialise(eventType EventType, data []byte) (any, error) {
+func NewEventDeserialiser() EventDeserialiser {
+	return make(EventDeserialiser)
+}
+
+func (c *EventDeserialiser) Deserialise(eventType EventType, data []byte) (any, error) {
 	fn, ok := (*c)[eventType]
 	if !ok {
 		return nil, fmt.Errorf("no deserialiser for event type %v", eventType)
@@ -18,25 +22,16 @@ func (c *EventDeserialiserConfig) Deserialise(eventType EventType, data []byte) 
 	return fn(data)
 }
 
-// AddEventDeSerialiser creates a function that can be used to deserialise events.
-func AddEventDeSerialiser[T any](config EventDeserialiserConfig) {
- fn := func(data []byte) (any, error) {
-		var val T;
-		err := json.Unmarshal(data, &val);
+// AddJsonEventDeserialiser creates a function that can be used to deserialise events.
+func AddJsonEventDeserialiser[T any](deserialiser EventDeserialiser) {
+	fn := func(data []byte) (any, error) {
+		var val T
+		err := json.Unmarshal(data, &val)
 		if err != nil {
-			return nil, err;
+			return nil, err
 		}
-		return val, nil;
+		return val, nil
 	}
 	var zero T
-	config[GetEventType(zero)] = fn
-}
-
-func GetEventType(value any) EventType {
-	ty := reflect.TypeOf(value)
-	pkg := path.Base(ty.PkgPath())
-	if pkg == "." {
-		return EventType(ty.Name())
-	}
-	return EventType(pkg + "." + ty.Name())
+	deserialiser[GetEventType(zero)] = fn
 }

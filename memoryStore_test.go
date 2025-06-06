@@ -7,12 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createEventDeserialiser() *EventDeserialiserConfig {
-	var cfg EventDeserialiserConfig = make(map[EventType]EventDeserialiser)
-	AddEventDeSerialiser[added](cfg)
-	AddEventDeSerialiser[subtracted](cfg)
-	AddEventDeSerialiser[updated](cfg)
-	return &cfg
+func createEventDeserialiser() *EventDeserialiser {
+	eventDeserialiser := NewEventDeserialiser()
+	AddJsonEventDeserialiser[added](eventDeserialiser)
+	AddJsonEventDeserialiser[subtracted](eventDeserialiser)
+	AddJsonEventDeserialiser[updated](eventDeserialiser)
+	return &eventDeserialiser
 }
 
 func createEventSourcedSession(t *testing.T) *Session {
@@ -20,7 +20,7 @@ func createEventSourcedSession(t *testing.T) *Session {
 		Aggregates: map[AggregateType]AggregateConfig{
 			"Calculator": {StoreStrategy: eventSourced},
 		},
-		EventDeserialiser: createEventDeserialiser(),
+		EventDeserialiser:  createEventDeserialiser(),
 		SnapshotSerialiser: &JsonSnapshotSerialiser,
 	}
 	var provider StoreProvider = NewMemoryStoreProvider(&config)
@@ -33,13 +33,12 @@ func createEventSourcedSession(t *testing.T) *Session {
 	return session
 }
 
-
 func createSnapshotSession(t *testing.T) *Session {
 	config := Config{
 		Aggregates: map[AggregateType]AggregateConfig{
 			"Calculator": {StoreStrategy: alwaysSnapshot},
 		},
-		EventDeserialiser: createEventDeserialiser(),
+		EventDeserialiser:  createEventDeserialiser(),
 		SnapshotSerialiser: &JsonSnapshotSerialiser,
 	}
 	var provider StoreProvider = NewMemoryStoreProvider(&config)

@@ -1,6 +1,8 @@
 package moments
 
 import (
+	"path"
+	"reflect"
 	"time"
 )
 
@@ -33,6 +35,15 @@ type Event struct {
 type ApplyArgs struct {
 	EventId   EventId
 	Timestamp time.Time
+}
+
+func GetEventType(value any) EventType {
+	ty := reflect.TypeOf(value)
+	pkg := path.Base(ty.PkgPath())
+	if pkg == "." {
+		return EventType(ty.Name())
+	}
+	return EventType(pkg + "." + ty.Name())
 }
 
 func NewEvent(data any, args *ApplyArgs) Event {

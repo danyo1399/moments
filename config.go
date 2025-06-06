@@ -3,7 +3,7 @@ package moments
 type Config struct {
 	Aggregates map[AggregateType]AggregateConfig
 	SnapshotSerialiser *SnapshotSerialiser
-	EventDeserialiser *EventDeserialiserConfig
+	EventDeserialiser *EventDeserialiser
 
 }
 type AggregateConfig struct {
