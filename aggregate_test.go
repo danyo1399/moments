@@ -3,6 +3,7 @@ package moments
 import (
 	"fmt"
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,11 +13,11 @@ func TestCreateSnapshot(t *testing.T) {
 
 	snap := calc.CreateSnapshot(JsonSnapshotSerialiser)
 
-	var snapState calculatorState 
+	var snapState calculatorState
 	err := JsonSnapshotSerialiser.Unmarshal(snap.State, &snapState)
 	assert.Nil(t, err)
 
-	assert.Equal(t, calc.Id(), snap.StreamId.Id)
+	assert.Equal(t, calc.Id(), snap.Id.StreamId.Id)
 	assert.Equal(t, calc.Version(), snap.Version)
 	assert.Equal(t, calc.State(), snapState)
 }

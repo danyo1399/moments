@@ -28,7 +28,7 @@ func (p MemoryStoreProvider) NewTenant(tenant string) error {
 		eventsMap: map[StreamId][]PersistedEvent{},
 		events:    []PersistedEvent{},
 		sequence:  atomic.Uint64{},
-		snapshots: map[StreamId]Snapshot{},
+		snapshots: map[SnapshotId]Snapshot{},
 		eventData: make(map[Sequence][]byte),
 	}
 	return nil

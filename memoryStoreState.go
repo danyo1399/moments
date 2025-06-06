@@ -12,7 +12,7 @@ type MemoryStoreTenantState struct {
 	streams   map[StreamId]*Stream
 	eventsMap map[StreamId][]PersistedEvent
 	events    []PersistedEvent
-	eventData    map[Sequence][]byte
+	eventData map[Sequence][]byte
 	sequence  atomic.Uint64
-	snapshots map[StreamId]Snapshot
+	snapshots map[SnapshotId]Snapshot
 }

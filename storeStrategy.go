@@ -61,7 +61,8 @@ type snapshotStoreStrategy struct{}
 
 func (s *snapshotStoreStrategy) load(aggregate IAggregate, session *Session) error {
 	streamId := aggregate.StreamId()
-	state, err := session.Store.LoadSnapshot(streamId)
+	id := NewSnapshotId(streamId, aggregate.SchemaVersion())
+	state, err := session.Store.LoadSnapshot(id)
 	if err != nil {
 		return err
 	}

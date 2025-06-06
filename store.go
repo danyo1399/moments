@@ -20,12 +20,10 @@ type SaveEventArgs struct {
 	Snapshot        *Snapshot
 }
 type Store interface {
+	SnapshotStore
 	SaveEvents(
 		args SaveEventArgs,
 	) error
 	LoadEvents(options LoadEventArgs) ([]PersistedEvent, error)
-	SaveSnapshot(snapshot *Snapshot) error
-	LoadSnapshot(streamId StreamId) (*Snapshot, error)
-	DeleteSnapshot(streamId StreamId) error
 	Close()
 }

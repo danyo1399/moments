@@ -7,21 +7,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestLoadSaveDeleteSnapshot(t *testing.T, store moments.Store) {
-
+	streamId := moments.StreamId{Id: "id", StreamType: "streamType"}
 	snapshot := moments.Snapshot{
-		StreamId:      moments.StreamId{Id: "id", StreamType: "streamType"},
-		Version:       1,
-		SchemaVersion: 2,
-		State:         []byte("test"),
+		Id:      moments.NewSnapshotId(streamId, 2),
+		Version: 1,
+		State:   []byte("test"),
 	}
 	store.SaveSnapshot(&snapshot)
-	loadedSnapshot, err := store.LoadSnapshot(snapshot.StreamId)
+	loadedSnapshot, err := store.LoadSnapshot(snapshot.Id)
 	assert.NoError(t, err)
-	err = store.DeleteSnapshot(snapshot.StreamId)
+	err = store.DeleteSnapshot(snapshot.Id)
 	assert.NoError(t, err)
-	deletedSnapshot, err := store.LoadSnapshot(snapshot.StreamId)
+	deletedSnapshot, err := store.LoadSnapshot(snapshot.Id)
 	assert.NoError(t, err)
 
 	assert.Nil(t, deletedSnapshot)

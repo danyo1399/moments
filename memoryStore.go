@@ -7,12 +7,12 @@ import (
 )
 
 type MemoryStore struct {
-	state *MemoryStoreTenantState
+	state  *MemoryStoreTenantState
 	config *Config
 }
 
 func NewMemoryStore(state *MemoryStoreTenantState, config *Config) *MemoryStore {
-	s := MemoryStore{state: state, config: config,}
+	s := MemoryStore{state: state, config: config}
 	return &s
 }
 
@@ -20,21 +20,21 @@ func (s *MemoryStore) Close() {
 }
 
 func (s *MemoryStore) SaveSnapshot(snapshot *Snapshot) error {
-	streamId := snapshot.StreamId
-	s.state.snapshots[streamId] = *snapshot
+	id := snapshot.Id
+	s.state.snapshots[id] = *snapshot
 	return nil
 }
 
-func (s *MemoryStore) LoadSnapshot(streamId StreamId) (*Snapshot, error) {
-	ss, ok := s.state.snapshots[streamId]
+func (s *MemoryStore) LoadSnapshot(id SnapshotId) (*Snapshot, error) {
+	ss, ok := s.state.snapshots[id]
 	if !ok {
 		return nil, nil
 	}
 	return &ss, nil
 }
 
-func (s *MemoryStore) DeleteSnapshot(streamId StreamId) error {
-	delete(s.state.snapshots, streamId)
+func (s *MemoryStore) DeleteSnapshot(id SnapshotId) error {
+	delete(s.state.snapshots, id)
 	return nil
 }
 
@@ -76,7 +76,7 @@ func (s MemoryStore) SaveEvents(args SaveEventArgs) error {
 		state.eventData[seq] = data
 	}
 	if snapshot != nil {
-		state.snapshots[streamId] = *snapshot
+		state.snapshots[snapshot.Id] = *snapshot
 	}
 	if !streamExists {
 		state.streams[streamId] = stream

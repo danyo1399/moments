@@ -58,10 +58,9 @@ func (a *Aggregate[TState]) Snapshot(serialiser *SnapshotSerialiser) Snapshot {
 	}
 
 	return Snapshot{
-		StreamId:      a.StreamId(),
-		Version:       a.version,
-		State:         state,
-		SchemaVersion: a.schemaVersion,
+		Id:      NewSnapshotId(a.StreamId(), a.SchemaVersion()),
+		Version: a.version,
+		State:   state,
 	}
 }
 
@@ -70,12 +69,12 @@ func (a *Aggregate[TState]) SchemaVersion() SchemaVersion {
 }
 
 func (a *Aggregate[TState]) loadSnapshot(snapshot *Snapshot, serialiser *SnapshotSerialiser) {
-	if snapshot.SchemaVersion != a.schemaVersion {
+	if snapshot.Id.SchemaVersion != a.schemaVersion {
 		panic(fmt.Sprintf("snapshot schema version %v does not match aggregate schema version %v",
-			snapshot.SchemaVersion, a.schemaVersion))
+			snapshot.Id.SchemaVersion, a.schemaVersion))
 	}
-	if snapshot.StreamId != a.StreamId() {
-		panic(fmt.Sprintf("snapshot stream id %v does not match aggregate stream id %v", snapshot.StreamId, a.StreamId()))
+	if snapshot.Id.StreamId != a.StreamId() {
+		panic(fmt.Sprintf("snapshot stream id %v does not match aggregate stream id %v", snapshot.Id.StreamId, a.StreamId()))
 	}
 	if a.HasUnsavedChanges() {
 		panic("cannot load snapshot into aggregate with unsaved changes")
@@ -248,8 +247,8 @@ func (a *Aggregate[T]) CreateSnapshot(serialiser SnapshotSerialiser) Snapshot {
 	}
 
 	return Snapshot{
-		StreamId: a.StreamId(),
-		Version:  a.version,
-		State:    state,
+		Id:      NewSnapshotId(a.StreamId(), a.SchemaVersion()),
+		Version: a.version,
+		State:   state,
 	}
 }
