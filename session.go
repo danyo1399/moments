@@ -14,7 +14,7 @@ type Session struct {
 	CorrelationId CorrelationId
 	CausationId   CausationId
 	Metadata      Metadata
-	tenant        string
+	tenant        TenantId
 	config        Config
 	persister     storeStrategy
 }
@@ -29,8 +29,8 @@ func NewSessionProvider(storeProvider StoreProvider, config Config) SessionProvi
 	}
 }
 
-func (sp *SessionProvider) NewSession(tenant string) (*Session, error) {
-	store, err := sp.StoreProvider.GetStore(tenant)
+func (sp *SessionProvider) NewSession(tenant TenantId) (*Session, error) {
+	store, err := sp.StoreProvider.NewStore(tenant)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (sp *SessionProvider) NewSession(tenant string) (*Session, error) {
 	return &session, nil
 }
 
-func newSession(tenant string, store Store, config Config) Session {
+func newSession(tenant TenantId, store Store, config Config) Session {
 	return Session{
 		Store:         store,
 		tenant:        tenant,

@@ -5,7 +5,7 @@ import (
 )
 
 type MemoryStoreState struct {
-	tenants map[string]*MemoryStoreTenantState
+	tenants map[TenantId]*MemoryStoreTenantState
 }
 
 type MemoryStoreTenantState struct {

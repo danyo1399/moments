@@ -11,14 +11,14 @@ type MemoryStoreProvider struct {
 	config *Config
 }
 
-func NewMemoryStoreProvider(config *Config) MemoryStoreProvider {
-	return MemoryStoreProvider{
-		state:  &MemoryStoreState{tenants: map[string]*MemoryStoreTenantState{}},
+func NewMemoryStoreProvider(config *Config) *MemoryStoreProvider {
+	return &MemoryStoreProvider{
+		state:  &MemoryStoreState{tenants: map[TenantId]*MemoryStoreTenantState{}},
 		config: config,
 	}
 }
 
-func (p MemoryStoreProvider) NewTenant(tenant string) error {
+func (p *MemoryStoreProvider) NewTenant(tenant TenantId) error {
 	state := p.state
 	if _, exists := state.tenants[tenant]; exists {
 		return errors.New(fmt.Sprintln("Tenant already exists", tenant))
@@ -34,12 +34,17 @@ func (p MemoryStoreProvider) NewTenant(tenant string) error {
 	return nil
 }
 
-func (p MemoryStoreProvider) DeleteTenant(tenant string) error {
+func (p *MemoryStoreProvider) TenantExists(id TenantId) (bool, error) {
+	_, exists := p.state.tenants[id]
+	return exists, nil
+}
+
+func (p *MemoryStoreProvider) DeleteTenant(tenant TenantId) error {
 	delete(p.state.tenants, tenant)
 	return nil
 }
 
-func (p MemoryStoreProvider) GetStore(tenant string) (Store, error) {
+func (p *MemoryStoreProvider) NewStore(tenant TenantId) (Store, error) {
 	state := p.state
 	tenantState, exists := state.tenants[tenant]
 	if !exists {
@@ -49,5 +54,5 @@ func (p MemoryStoreProvider) GetStore(tenant string) (Store, error) {
 	return store, nil
 }
 
-func (p MemoryStoreProvider) Close() {
+func (p *MemoryStoreProvider) Close() {
 }
