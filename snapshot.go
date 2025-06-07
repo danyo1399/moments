@@ -1,6 +1,9 @@
 package moments
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // Snapshot is a snapshot of an aggregate's state at a given point in time.
 type Snapshot struct {
@@ -11,6 +14,10 @@ type Snapshot struct {
 type SnapshotId struct {
 	StreamId      StreamId
 	SchemaVersion SchemaVersion
+}
+
+func (s SnapshotId) String() string {
+	return fmt.Sprintf("%v:%v", s.StreamId, s.SchemaVersion)
 }
 
 func NewSnapshotId(streamId StreamId, schemaVersion SchemaVersion) SnapshotId {

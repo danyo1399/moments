@@ -50,7 +50,7 @@ func TestAppendEvents(t *testing.T) {
 
 func TestStreamIdFormatted(t *testing.T) {
 	calc := newCalculator("")
-	assert.Equal(t, "Calculator__"+calc.Id(), calc.StreamId().String())
+	assert.Equal(t, "Calculator:"+calc.Id(), calc.StreamId().String())
 }
 
 func TestIdNotSame(t *testing.T) {

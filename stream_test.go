@@ -8,5 +8,5 @@ import (
 
 func TestCreateStreamId(t *testing.T) {
 	streamId := StreamId{Id: "1", StreamType: "Calculator"}
-	assert.Equal(t, "Calculator__1", streamId.String())
+	assert.Equal(t, "Calculator:1", streamId.String())
 }
