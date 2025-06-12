@@ -2,17 +2,18 @@ package test
 
 import (
 	"fmt"
+
 	m "github.com/danyo1399/moments"
 )
 
-type Added struct {
+type Calculator_Added_V1 struct {
 	Value int
 }
 
-type Updated struct {
+type Calculator_Updated_V1 struct {
 	Value int
 }
-type Subtracted struct {
+type Calculator_Subtracted_V1 struct {
 	Value int
 }
 
@@ -24,6 +25,7 @@ type Calculator struct {
 }
 
 const CalculatorType m.AggregateType = "Calculator"
+
 var initStateFunc = func() CalculatorState {
 	return CalculatorState{0}
 }
@@ -32,11 +34,11 @@ var newCalculatorAggregate = m.NewAggregateFactory(CalculatorType, initStateFunc
 func reducer(state CalculatorState, events ...any) CalculatorState {
 	for _, event := range events {
 		switch e := event.(type) {
-		case Added:
+		case Calculator_Added_V1:
 			state.Value += e.Value
-		case Subtracted:
+		case Calculator_Subtracted_V1:
 			state.Value -= e.Value
-		case Updated:
+		case Calculator_Updated_V1:
 			state.Value = e.Value
 		default:
 			panic(fmt.Sprintln("unknown event type", e, event))
@@ -46,17 +48,17 @@ func reducer(state CalculatorState, events ...any) CalculatorState {
 }
 
 func (c *Calculator) subtract(val int) {
-	evt := Subtracted{val}
+	evt := Calculator_Subtracted_V1{val}
 	c.Apply(evt, nil)
 }
 
 func (c *Calculator) update(val int) {
-	evt := Updated{val}
+	evt := Calculator_Updated_V1{val}
 	c.Apply(evt, nil)
 }
 
 func (c *Calculator) add(val int) {
-	evt := Added{val}
+	evt := Calculator_Added_V1{val}
 	c.Apply(evt, nil)
 }
 
@@ -69,7 +71,6 @@ func NewCalculatorFromEvents(id string, events []any) *Calculator {
 }
 
 func NewCalculator(id string) *Calculator {
-
 	agg := newCalculatorAggregate(m.WithId[CalculatorState](id))
 	calculator := Calculator{
 		Aggregate: *agg,

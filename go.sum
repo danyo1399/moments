@@ -1,3 +1,7 @@
+github.com/danyo1399/gotils v0.0.2 h1:wfOBCs7pMy5l2ui3Smuzt2GI6MEAoyfewEVPzZ99yT8=
+github.com/danyo1399/gotils v0.0.2/go.mod h1:0HrJZKxR+oz+i9NGk8vxbLUOZCyDeqPhyT4MI7EPC4Y=
+github.com/danyo1399/gotils v0.0.3 h1:HgqQZbqHT3tJOpZ36/PnnyLlIQDyj3VOyUdB10ADU2M=
+github.com/danyo1399/gotils v0.0.3/go.mod h1:0HrJZKxR+oz+i9NGk8vxbLUOZCyDeqPhyT4MI7EPC4Y=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=

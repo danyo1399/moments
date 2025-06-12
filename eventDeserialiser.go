@@ -23,7 +23,7 @@ func (c *EventDeserialiser) Deserialise(eventType EventType, data []byte) (any, 
 }
 
 // AddJsonEventDeserialiser creates a function that can be used to deserialise events.
-func AddJsonEventDeserialiser[T any](deserialiser EventDeserialiser) {
+func AddJsonEventDeserialiser[T any](deserialiser EventDeserialiser) error {
 	fn := func(data []byte) (any, error) {
 		var val T
 		err := json.Unmarshal(data, &val)
@@ -33,5 +33,11 @@ func AddJsonEventDeserialiser[T any](deserialiser EventDeserialiser) {
 		return val, nil
 	}
 	var zero T
-	deserialiser[GetEventType(zero)] = fn
+
+	eventType, err := GetEventType(zero)
+	if err != nil {
+		return err
+	}
+	deserialiser[*eventType] = fn
+	return nil
 }

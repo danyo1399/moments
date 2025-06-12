@@ -40,11 +40,17 @@ func TestAppendEvents(t *testing.T) {
 
 	evt1 := calc.UnsavedEvents()[0]
 	unsavedEvents := calc.UnsavedEvents()
+	evtType, err := GetEventType(evt1.Data)
+	assert.NoError(t, err)
 	assert.Equal(t, 7, calc.State().Value)
 	assert.Equal(t, Version(2), calc.Version())
 	assert.Equal(t, 2, len(unsavedEvents))
 	assert.NotEmpty(t, evt1.EventId)
-	assert.Equal(t, GetEventType(evt1.Data), EventType("moments.added"))
+	assert.Equal(t, *evtType, EventType{
+		SchemaVersion: SchemaVersion(1),
+		AggregateType: "calculator",
+		Name:          "added",
+	})
 	// assert.NotEmpty(t, evt1.CorrelationId)
 }
 

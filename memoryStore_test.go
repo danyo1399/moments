@@ -9,9 +9,9 @@ import (
 
 func createEventDeserialiser() *EventDeserialiser {
 	eventDeserialiser := NewEventDeserialiser()
-	AddJsonEventDeserialiser[added](eventDeserialiser)
-	AddJsonEventDeserialiser[subtracted](eventDeserialiser)
-	AddJsonEventDeserialiser[updated](eventDeserialiser)
+	AddJsonEventDeserialiser[calculator_added_v1](eventDeserialiser)
+	AddJsonEventDeserialiser[calculator_subtracted_v1](eventDeserialiser)
+	AddJsonEventDeserialiser[calculator_updated_v1](eventDeserialiser)
 	return &eventDeserialiser
 }
 

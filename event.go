@@ -1,15 +1,24 @@
 package moments
 
 import (
-	"path"
+	"fmt"
 	"reflect"
+	"strconv"
+	"strings"
 	"time"
+
+	"github.com/danyo1399/gotils"
 )
+
+type EventType struct {
+	SchemaVersion SchemaVersion
+	AggregateType string
+	Name          string
+}
 
 type (
 	CorrelationId string
 	CausationId   string
-	EventType     string
 	EventId       string
 	Metadata      map[string]any
 )
@@ -37,13 +46,26 @@ type ApplyArgs struct {
 	Timestamp time.Time
 }
 
-func GetEventType(value any) EventType {
-	ty := reflect.TypeOf(value)
-	pkg := path.Base(ty.PkgPath())
-	if pkg == "." {
-		return EventType(ty.Name())
+func getEventTypeFromName(name string) (*EventType, error) {
+	parts := strings.Split(name, "_")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("invalid event type name %v", name)
 	}
-	return EventType(pkg + "." + ty.Name())
+	version, err := strconv.Atoi(parts[2][1:])
+	if err != nil {
+		return nil, fmt.Errorf("invalid event type version %v", parts[2])
+	}
+	return &EventType{
+		SchemaVersion: SchemaVersion(version),
+		AggregateType: gotils.ToSnakeCase(parts[0]),
+		Name:          gotils.ToSnakeCase(parts[1]),
+	}, nil
+}
+
+func GetEventType(value any) (*EventType, error) {
+	ty := reflect.TypeOf(value)
+	name := ty.Name()
+	return getEventTypeFromName(name)
 }
 
 func NewEvent(data any, args *ApplyArgs) Event {
@@ -67,11 +89,15 @@ func (e *Event) ToPersistedEvent(
 	version Version, correlationId CorrelationId,
 	causationId CausationId, metadata Metadata,
 ) PersistedEvent {
+	eventType, err := e.EventType()
+	if err != nil {
+		panic(err)
+	}
 	r := PersistedEvent{
 		StreamId:       streamId,
 		Sequence:       sequence,
 		GlobalSequence: globalSequence,
-		EventType:      e.EventType(),
+		EventType:      *eventType,
 		Version:        version,
 		CorrelationId:  correlationId,
 		CausationId:    causationId,
@@ -85,6 +111,6 @@ func (e *Event) ToPersistedEvent(
 	return r
 }
 
-func (e *Event) EventType() EventType {
+func (e *Event) EventType() (*EventType, error) {
 	return GetEventType(e.Data)
 }

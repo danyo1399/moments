@@ -16,7 +16,7 @@ func TestNewEventWithJustData(t *testing.T) {
 }
 
 func TestToPersistedEvent(t *testing.T) {
-	evt := NewEvent("8", &ApplyArgs{
+	evt := NewEvent(calculator_added_v1{value: 8}, &ApplyArgs{
 		EventId:   "1",
 		Timestamp: time.Now(),
 	})
@@ -26,7 +26,8 @@ func TestToPersistedEvent(t *testing.T) {
 	streamId := StreamId{Id: "1", StreamType: "Calculator"}
 	pe := evt.ToPersistedEvent(streamId, seq, globalSeq, Version(1), CorrelationId("co"), CausationId("ca"), Metadata{})
 	assert.Equal(t, evt.EventId, pe.EventId)
-	assert.Equal(t, EventType("string"), pe.EventType)
+	assert.Equal(t, EventType{SchemaVersion: SchemaVersion(1), AggregateType: "calculator", Name: "added"},
+		pe.EventType)
 	assert.Equal(t, Version(1), pe.Version)
 	assert.Equal(t, evt.Data, pe.Data)
 	assert.Equal(t, seq, pe.Sequence)

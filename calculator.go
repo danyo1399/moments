@@ -4,20 +4,21 @@ import (
 	"fmt"
 )
 
-type added struct {
+type calculator_added_v1 struct {
 	value int
 }
 
-type updated struct {
+type calculator_updated_v1 struct {
 	value int
 }
-type subtracted struct {
+type calculator_subtracted_v1 struct {
 	value int
 }
 
 type calculatorState struct {
 	Value int
 }
+
 type calculator struct {
 	Aggregate[calculatorState]
 }
@@ -32,11 +33,11 @@ var newCalculatorAggregate = NewAggregateFactory(calculatorType, initStateFunc, 
 func reducer(state calculatorState, events ...any) calculatorState {
 	for _, event := range events {
 		switch e := event.(type) {
-		case added:
+		case calculator_added_v1:
 			state.Value += e.value
-		case subtracted:
+		case calculator_subtracted_v1:
 			state.Value -= e.value
-		case updated:
+		case calculator_updated_v1:
 			state.Value = e.value
 		default:
 			panic(fmt.Sprintln("unknown event type", e, event))
@@ -46,17 +47,17 @@ func reducer(state calculatorState, events ...any) calculatorState {
 }
 
 func (c *calculator) subtract(val int) {
-	evt := subtracted{val}
+	evt := calculator_subtracted_v1{val}
 	c.Apply(evt, nil)
 }
 
 func (c *calculator) update(val int) {
-	evt := updated{val}
+	evt := calculator_updated_v1{val}
 	c.Apply(evt, nil)
 }
 
 func (c *calculator) add(val int) {
-	evt := added{val}
+	evt := calculator_added_v1{val}
 	c.Apply(evt, nil)
 }
 
