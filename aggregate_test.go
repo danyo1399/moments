@@ -50,6 +50,7 @@ func TestAppendEvents(t *testing.T) {
 		SchemaVersion: SchemaVersion(1),
 		AggregateType: "calculator",
 		Name:          "added",
+		Id:            "calculator_added_v1",
 	})
 	// assert.NotEmpty(t, evt1.CorrelationId)
 }

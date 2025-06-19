@@ -10,12 +10,6 @@ import (
 	"github.com/danyo1399/gotils"
 )
 
-type EventType struct {
-	SchemaVersion SchemaVersion
-	AggregateType string
-	Name          string
-}
-
 type (
 	CorrelationId string
 	CausationId   string
@@ -46,10 +40,21 @@ type ApplyArgs struct {
 	Timestamp time.Time
 }
 
-func getEventTypeFromName(name string) (*EventType, error) {
-	parts := strings.Split(name, "_")
+type EventType struct {
+	SchemaVersion SchemaVersion
+	AggregateType string
+	Name          string
+	Id            string
+}
+
+func (e *EventType) String() string {
+	return e.Id
+}
+
+func getEventTypeFromName(id string) (*EventType, error) {
+	parts := strings.Split(id, "_")
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("invalid event type name %v", name)
+		return nil, fmt.Errorf("invalid event type name %v", id)
 	}
 	version, err := strconv.Atoi(parts[2][1:])
 	if err != nil {
@@ -59,6 +64,7 @@ func getEventTypeFromName(name string) (*EventType, error) {
 		SchemaVersion: SchemaVersion(version),
 		AggregateType: gotils.ToSnakeCase(parts[0]),
 		Name:          gotils.ToSnakeCase(parts[1]),
+		Id:            id,
 	}, nil
 }
 
