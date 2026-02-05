@@ -6,7 +6,7 @@ An event sourcing library for GO.
 
 go install gotest.tools/gotestsum@latest
 
-## tools
+## Todo
 
 - upcast event
 - raft protocal
